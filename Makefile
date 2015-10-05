@@ -15,7 +15,9 @@ LDFLAGS_P := $(LDFLAGS) -Wl,--gc-sections
 
 # aggressive strip command
 # note that this breaks the x86 build on x86-64 for some reason
-STRIP     := strip -s -R .note -R .comment -R .gnu.version -R .gnu.version_r
+#STRIP     := strip -s -R .note -R .comment -R .gnu.version -R .gnu.version_r
+# Less aggressive, works for RPi
+STRIP     := strip -s -R .note -R .comment -R .gnu.version
 
 # agressive UPX compress
 UPX       := upx -9
@@ -46,6 +48,14 @@ ARMPREFIX := arm-unknown-linux-gnueabihf-
 ARMCC     := $(ARMPREFIX)$(CC)
 ARMSTRIP  := $(ARMPREFIX)$(STRIP)
 
+# RPi environment
+RPITOOLS  := /usr/bin
+#RPIPATH  := PATH=$(RPITOOLS):$(PATH)
+RPIPREFIX := arm-linux-gnueabihf-
+RPICC     := $(RPIPREVIX)$(CC)
+RPIOPTS   := -lrt
+RPISTRIP  := $(RPIPREFIX)$(STRIP)
+
 # tomatoware environment uses basic setup options because it compiles native
 
 # targets - notes:
@@ -54,9 +64,9 @@ ARMSTRIP  := $(ARMPREFIX)$(STRIP)
 # - mips version could be K24 or K26 depending on environment
 # - tomatoware is not included in the 'all' target, because it's for compiling natively on a router
 
-.PHONY: all clean distclean printver x86 x86_x64 mips arm tomatoware
+.PHONY: all clean distclean printver x86 x86_x64 mips arm tomatoware RPi
 
-all: x86 x86_64 mips #arm
+all: x86 x86_64 mips arm RPi
 	@echo "=== Built all x86 and cross-compiler targets ==="
 
 clean:
@@ -128,3 +138,15 @@ tomatoware: printver dist
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
 	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+
+RPi: printver dist
+	@echo "=== Building for Raspberry Pi ==="
+	$(RPIPATH) $(RPICC) $(CFLAGS_D) $(LDFLAGS_D) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.debug.dynamic
+	$(RPIPATH) $(RPICC) $(CFLAGS_P) $(LDFLAGS_P) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.performance.dynamic
+#	$(RPIPATH) $(RPICC) $(CFLAGS_D) -static $(LDFLAGS_D) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.debug.static
+#	$(RPIPATH) $(RPICC) $(CFLAGS_P) -static $(LDFLAGS_P) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.performance.static
+	$(RPIPATH) $(RPISTRIP) dist/$(DISTNAME).$@.performance.*
+	$(UPX) dist/$(DISTNAME).$@.performance.*
+	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+
