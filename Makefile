@@ -25,7 +25,7 @@ UPX       := upx -9
 # packaging macros
 PFILES    := LICENSE README.md
 PVERSION  := $(shell grep VERSION util.h | awk '{print $$NF}' | sed 's|\"||g')
-PCMD      := zip
+PCMD      := zip -j
 
 # x86 environment
 CC32      := $(CC) -m32
@@ -64,9 +64,9 @@ RPISTRIP  := $(RPIPREFIX)$(STRIP)
 # - mips version could be K24 or K26 depending on environment
 # - tomatoware is not included in the 'all' target, because it's for compiling natively on a router
 
-.PHONY: all clean distclean printver x86 x86_x64 mips arm tomatoware RPi
+.PHONY: all clean distclean printver x86 x86_x64 mips arm tomatoware rpi
 
-all: x86 x86_64 mips arm RPi
+all: x86 x86_64 mips #arm rpi
 	@echo "=== Built all x86 and cross-compiler targets ==="
 
 clean:
@@ -93,7 +93,7 @@ x86: printver dist
 	$(STRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
 
 x86_64: printver dist
 	@echo "=== Building x86-64 ==="
@@ -104,7 +104,7 @@ x86_64: printver dist
 	$(STRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
 
 mips: printver dist
 	@echo "=== Building MIPS ==="
@@ -115,7 +115,7 @@ mips: printver dist
 	$(MIPSPATH) $(MIPSSTRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
 
 arm: printver dist
 	@echo "=== Building ARM ==="
@@ -126,7 +126,7 @@ arm: printver dist
 	$(ARMPATH) $(ARMSTRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
 
 tomatoware: printver dist
 	@echo "=== Building tomatoware ==="
@@ -137,9 +137,9 @@ tomatoware: printver dist
 	$(STRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
 
-RPi: printver dist
+rpi: printver dist
 	@echo "=== Building for Raspberry Pi ==="
 	$(RPIPATH) $(RPICC) $(CFLAGS_D) $(LDFLAGS_D) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.debug.dynamic
 	$(RPIPATH) $(RPICC) $(CFLAGS_P) $(LDFLAGS_P) $(OPTS) $(RPIOPTS) $(SRCS) -o dist/$(DISTNAME).$@.performance.dynamic
@@ -148,5 +148,4 @@ RPi: printver dist
 	$(RPIPATH) $(RPISTRIP) dist/$(DISTNAME).$@.performance.*
 	$(UPX) dist/$(DISTNAME).$@.performance.*
 	rm -f dist/$(DISTNAME).$(PVERSION).$@.zip
-	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES)
-
+	$(PCMD) dist/$(DISTNAME).$(PVERSION).$@.zip $(PFILES) dist/$(DISTNAME).$@.*
