@@ -214,13 +214,6 @@ static const char httpnull_ico[] =
   "\x00\x00\x00\x00" // XOR B G R
   "\x80\xF8\x9C\x41"; // AND ?
 
-static const char SSL_no[] =
-  "\x15"     // Alert (21)
-  "\x03\x00" // Version 3.0
-  "\x00\x02" // length 2
-  "\x02"     // fatal
-  "\x31";    // 0 close notify, 0x28 Handshake failure 40, 0x31 TLS access denied 49
-
 // private functions for socket_handler() use
 #ifdef HEX_DUMP
 // from http://sws.dett.de/mini/hexdump-c/
@@ -395,6 +388,7 @@ void socket_handler(int argc
                    ,const char* const program_name
                    ,const int do_204
                    ,const int do_redirect
+                   ,const char ssl_alert
 #ifdef DEBUG
                    ,const int warning_time
 #endif //DEBUG
@@ -414,6 +408,14 @@ void socket_handler(int argc
   char* version_string = NULL;
   char* stat_string = NULL;
   struct timespec start_time = {0, 0};
+  const char SSL_no[] = {
+    '\x15'        // Alert (21)
+   ,'\x03','\x00' // Version 3.0
+   ,'\x00','\x02' // length 02
+   ,'\x02'        // fatal
+   ,ssl_alert     // 0 close notify, 0x28 Handshake failure 40, 0x31 TLS access denied 49
+   ,'\x00'        // string terminator (not part of actual response)
+  };
 #ifdef DEBUG
   double time_msec = 0.0;
   int do_warning = (warning_time > 0);

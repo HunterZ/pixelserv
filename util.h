@@ -22,7 +22,7 @@
 #include <time.h>               // struct timespec, clock_gettime(), difftime()
 
 // preprocessor defines
-#define VERSION "V35.HZ12"
+#define VERSION "V35.HZ13"
 
 #define BACKLOG SOMAXCONN       // how many pending connections queue will hold
 #define CHAR_BUF_SIZE 4095      // surprising how big requests can be with cookies and lengthy yahoo url!
@@ -62,6 +62,8 @@ static unsigned long LINE_NUMBER = __LINE__;
 #else
 # define SET_LINE_NUMBER(x)
 #endif //DEBUG
+
+#define DEFAULT_SSL_ALERT (char)49
 
 // cross-thread count variables
 extern volatile sig_atomic_t count; // req

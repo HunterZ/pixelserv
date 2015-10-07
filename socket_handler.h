@@ -43,6 +43,7 @@ void socket_handler(int argc
                    ,const char* const program_name
                    ,const int do_204
                    ,const int do_redirect
+                   ,const char ssl_alert
 #ifdef DEBUG
                    ,const int warning_time
 #endif //DEBUG

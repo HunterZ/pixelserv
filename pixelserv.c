@@ -116,6 +116,7 @@ int main (int argc, char* argv[]) // program start
 #ifdef DEBUG
   int warning_time = 0;
 #endif //DEBUG
+  char ssl_alert = DEFAULT_SSL_ALERT;
 
   SET_LINE_NUMBER(__LINE__);
 
@@ -139,6 +140,9 @@ int main (int argc, char* argv[]) // program start
       if ((i + 1) < argc) {
         // switch on parameter letter and process subsequent argument
         switch (argv[i++][1]) {
+          case 'c':
+            ssl_alert = (char)strtol(argv[i], NULL, 10);
+          continue;
 #ifdef IF_MODE
           case 'n':
             ifname = argv[i];
@@ -192,6 +196,7 @@ int main (int argc, char* argv[]) // program start
     printf("Usage:%s"
            " [IP No/hostname (all)]"
            " [-2 (disables HTTP 204 reply to generate_204 URLs)]"
+           " [-c ssl_alert_code (49 - access denied)]"
 #ifndef TEST
            " [-f (stay in foreground - don't daemonize)]"
 #endif // !TEST
@@ -565,6 +570,7 @@ int main (int argc, char* argv[]) // program start
                     ,argv[0]
                     ,do_204
                     ,do_redirect
+                    ,ssl_alert
 #ifdef DEBUG
                     ,warning_time
 #endif //DEBUG
